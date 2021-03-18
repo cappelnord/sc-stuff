@@ -87,7 +87,15 @@ SynthDef(\spectralComponent, {|freq=440, amp=0.01, buffer=0, length=10, pan=0, o
 	var freq = ~freqMap.value(y);
 	var phase = 2pi.rand; // decorrelate phase, set to 0.0 for correlated phase
 	var pan = 1.0.rand2; // distribute each spectral component randomly in stereo panorama
-	(instrument: \spectralComponent, amp: 1.0 / ~image.height, buffer: ~buffers[y], length: ~length, freq: freq, pan: pan, phase: phase).play;
+	(
+		instrument: \spectralComponent,
+		amp: 1.0 / ~image.height,
+		buffer: ~buffers[y],
+		length: ~length,
+		freq: freq,
+		pan: pan,
+		phase: phase
+	).play;
 };
 )
 
