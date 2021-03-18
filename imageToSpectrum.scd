@@ -1,14 +1,21 @@
-// boot the sound synthesis server with increased buffer numbers
+// prepare things, boot the server, set paths
 (
 s.options.numBuffers = 2**16;
 s.boot;
-)
 
 // load some functions
 "loadImage.scd".loadRelative;
 
 // put an image into the img folder, then specify the file name here:
 ~imagePath = "trametes-small-gray.png";
+)
+
+// to see what is going on
+(
+s.meter;
+s.scope;
+)
+
 
 (
 // load the image
