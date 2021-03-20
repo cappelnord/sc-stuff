@@ -1,16 +1,18 @@
-// prepare things, boot the server, set paths
 (
+// prepare things, boot the server, set paths
+
 s.boot;
 
 // load some functions
-"loadImage.scd".loadRelative;
+"functions/loadImage.scd".loadRelative;
 
 // put an image into the img folder, then specify the file name here:
 ~imagePath = "trametes.png";
 )
 
-// to see what is going on
 (
+// to see what is going on
+
 s.meter;
 s.scope;
 )
@@ -18,13 +20,14 @@ s.scope;
 
 (
 // load the image
+
 ~image = ~loadImageGray.value(Document.current.dir +/+ "img" +/+ ~imagePath);
 ("Image loaded: " + ~image.width + "x" + ~image.height + " pixels ...").postln;
 )
 
 (
-
 // we create a Buffer (in a sense a series of values) for each of the lines in the image
+
 ~lines = Array.newClear(~image.height);
 
 ~image.height.do {|y|
@@ -37,6 +40,7 @@ s.scope;
 	~lines[y] = array;
 };
 )
+
 
 // we can inspect the lines as curves
 ~lines[~image.height/2].plot
@@ -59,10 +63,12 @@ SynthDef(\spectralGrain, {|freq=440, amp=0.01, buffer=0, length=0.001, pan=0, ou
 
 
 (
+// how we map y-position to frequency
+
 ~lowFreq = 60;
 ~highFreq = 20000;
 
-// how we map y coordinate to frequency
+// the function
 ~freqMap = {|y|
 	// invert y axis; top lines should be highest freqs
 	y = ~image.height - y;
@@ -75,11 +81,12 @@ SynthDef(\spectralGrain, {|freq=440, amp=0.01, buffer=0, length=0.001, pan=0, ou
 
 
 (
-// PLAY TIME!
+// let's listen in!
+
 var currentTime = 0;
 ~length = 200; // how long should the audio be in seconds?
 
-Task({
+Tdef(\grainSpectrum, {
 	{currentTime < ~length}.while {
 		// never put this to 0!!! or to numbers smaller than 0.0002
 		var waitTime = 0.0005.rand;
@@ -94,7 +101,6 @@ Task({
 
 		// get an amplitude (and map linear to exponential)
 		var amp = value.linexp(0, 1, 0.01, 0.25);
-
 
 		// slightly panned by frequency
 		var pan = y.linlin(0, ~image.height.rand, -1, 1) * 0.4;
@@ -120,9 +126,10 @@ Task({
 	};
 	"done!".postln;
 }).play;
-
 )
 
+// enough of that!
+Tdef(\grainSpectrum).stop;
 
 // will start recording a file
 s.record;
@@ -130,5 +137,3 @@ s.record;
 // will stop recording a file
 // see in the post window where it is saved!
 s.stopRecording
-
-s.scope

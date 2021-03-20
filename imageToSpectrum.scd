@@ -1,17 +1,19 @@
-// prepare things, boot the server, set paths
 (
+// prepare things, boot the server, set paths
+
 s.options.numBuffers = 2**16;
 s.boot;
 
 // load some functions
-"loadImage.scd".loadRelative;
+"functions/loadImage.scd".loadRelative;
 
 // put an image into the img folder, then specify the file name here:
 ~imagePath = "trametes-small-gray.png";
 )
 
-// to see what is going on
 (
+// to see what is going on
+
 s.meter;
 s.scope;
 )
@@ -19,12 +21,14 @@ s.scope;
 
 (
 // load the image
+
 ~image = ~loadImageGray.value(Document.current.dir +/+ "img" +/+ ~imagePath);
 ("Image loaded: " + ~image.width + "x" + ~image.height + " pixels ...").postln;
 )
 
 (
 // free buffers if we have already allocated them ...
+
 ~buffers.do {|b|
 	b.free;
 };
@@ -60,13 +64,14 @@ SynthDef(\spectralComponent, {|freq=440, amp=0.01, buffer=0, length=10, pan=0, o
 )
 
 // let us test a single spectral component!
-(instrument: \spectralComponent, amp: 0.2, buffer: ~buffers[~image.height/2], length: 20, freq: 440).play
+(instrument: \spectralComponent, amp: 0.2, buffer: ~buffers[~image.height/2], length: 5, freq: 440).play
 
 (
+// how we map y position to frequency
+
 ~lowFreq = 20;
 ~highFreq = 20000;
 
-// how we map y coordinate to frequency
 ~freqMap = {|y|
 	// invert y axis; top lines should be highest freqs
 	y = ~image.height - y;
@@ -79,9 +84,11 @@ SynthDef(\spectralComponent, {|freq=440, amp=0.01, buffer=0, length=10, pan=0, o
 
 
 (
-// PLAY TIME!
+// let's listen in!
 
 ~length = 20; // how long should the audio be in seconds?
+
+~group = Group(s);
 
 ~image.height.do {|y|
 	var freq = ~freqMap.value(y);
@@ -94,11 +101,14 @@ SynthDef(\spectralComponent, {|freq=440, amp=0.01, buffer=0, length=10, pan=0, o
 		length: ~length,
 		freq: freq,
 		pan: pan,
-		phase: phase
+		phase: phase,
+		group: ~group
 	).play;
 };
 )
 
+// stop things if you had enough
+~group.free
 
 // will start recording a file
 s.record;
