@@ -5,8 +5,11 @@
 ~initWorld.();
 
 // Use some Brian-Eno style synths as sounds
+
 "functions/mc-eno.scd".loadRelative;
-~out = ~initEnoOut.();
+s.waitForBoot({
+	{~out = ~initEnoOut.();}.defer(0.5);
+});
 
 // Use this if you want to play out to some MIDI device
 // ~out = ~initMIDIOut.("Microsoft GS Wavetable Synth");
@@ -24,6 +27,7 @@
 // how many agents should run
 ~initAgents.(32);
 )
+
 
 (
 // the functions that should be used
@@ -58,9 +62,8 @@ var fungusKey = ~filename.split($.).first;
 
 	agent[\lenMap] = Prand([0.125, 0.5, 1, 0.75], inf) * 2;
 
-
-	agent[\act] = ~eno;
-	agent[\echo] = false;
+	agent[\act] = ~out;
+	agent[\echo] = true;
 	agent[\active] = i < activeAgents;
 };
 )
@@ -68,7 +71,8 @@ var fungusKey = ~filename.split($.).first;
 (
 // PLAY IT (might take a while to start, depending on how black the image is at the beginning)
 
-~length = 60 * 4; // in seconds or minutes (if you multiply by 60)
+
+~length = 60 * 4.0; // in seconds or minutes (if you multiply by 60)
 ~runAgents.(~length, {|i| i * 0.325});
 )
 
